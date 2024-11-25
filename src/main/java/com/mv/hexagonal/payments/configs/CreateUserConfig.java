@@ -7,8 +7,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class CreateUserConfig {
-    @Bean
-    public CreateUserUseCase createUserUseCase(CreateUserOutputPort createUserAdapter) {
-        return new CreateUserUseCase(createUserAdapter);
-    }
+  @Bean
+  public CreateUserUseCase createUserUseCase(CreateUserOutputPort createUserAdapter) {
+    return new CreateUserUseCase(createUserAdapter);
+  }
 }
