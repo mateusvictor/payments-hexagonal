@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,11 +15,11 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
-@Table(name = "users")
+@Table(name = "payments")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserEntity {
+public class PaymentEntity {
   @Id
   @Column(name = "id")
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,12 +33,21 @@ public class UserEntity {
   @UpdateTimestamp
   private LocalDateTime updatedAt;
 
-  @Column(name = "name")
-  private String name;
+  @Column(name = "amount")
+  private BigDecimal amount;
 
-  @Column(name = "email")
-  private String email;
+  @Column(name = "from_user_id")
+  private Long fromUserId;
 
-  @Column(name = "balance")
-  private String balance;
+  @Column(name = "to_user_id")
+  private Long toUserId;
+
+  @Column(name = "idempotency_key")
+  private String idempotencyKey;
+
+  @Column(name = "status")
+  private String status;
+
+  @Column(name = "status_detail")
+  private String statusDetail;
 }

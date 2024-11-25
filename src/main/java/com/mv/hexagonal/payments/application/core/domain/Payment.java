@@ -8,10 +8,12 @@ import lombok.Data;
 @Data
 @Builder
 public class Payment {
-    private Long id;
-    private BigDecimal amount;
-    private Long fromUserId;
-    private Long toUserId;
-    private String authenticationCode;
-    private LocalDateTime createdAt;
+  private Long id;
+  private BigDecimal amount;
+  private Long fromUserId;
+  private Long toUserId;
+  private String idempotencyKey;
+  private LocalDateTime createdAt;
+  private String status;
+  private String statusDetail;
 }
