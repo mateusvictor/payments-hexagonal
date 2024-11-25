@@ -2,8 +2,7 @@ spring:
   application:
     name: payments-hexagonal
   datasource:
-    url: jdbc:mysql://localhost:3308/payments-hexagonal?createDatabaseIfNotExist=true
-    db: payments-hexagonal
+    url: jdbc:mysql://localhost:3306/paymentshexagonal?createDatabaseIfNotExist=true
     username: root
     password:
     driver-class-name: com.mysql.cj.jdbc.Driver
