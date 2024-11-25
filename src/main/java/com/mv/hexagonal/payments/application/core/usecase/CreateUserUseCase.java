@@ -7,10 +7,10 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class CreateUserUseCase implements CreateUserInputPort {
-    private final CreateUserOutputPort createUserOutputPort;
+  private final CreateUserOutputPort createUserOutputPort;
 
-    @Override
-    public void create(User user) {
-        createUserOutputPort.create(user);
-    }
+  @Override
+  public void create(User user) {
+    createUserOutputPort.create(user);
+  }
 }

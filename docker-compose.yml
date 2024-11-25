@@ -1,0 +1,12 @@
+version: '1'
+
+services:
+  mysql-db:
+    image: mysql:8.0.17
+    hostname: mysql-db
+    container_name: hexagonal-db
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      MYSQL_DATABASE: paymentshexagonal
+    ports:
+      - "3306:3306"
