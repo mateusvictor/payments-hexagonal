@@ -1,0 +1,15 @@
+{
+    "request": {
+        "method": "POST",
+        "url": "/transactions/validate"
+    },
+    "response": {
+        "status": "200",
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "jsonBody": {
+            "valid": true
+        }
+    }
+}

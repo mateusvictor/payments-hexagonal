@@ -16,3 +16,11 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+
+clients:
+  fraud-api:
+    url: http://localhost:8081
+    timeout: 5000
+    max-connections: 100
+    max-per-route: 20
