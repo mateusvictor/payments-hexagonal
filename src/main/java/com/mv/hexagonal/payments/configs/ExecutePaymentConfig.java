@@ -5,6 +5,7 @@ import com.mv.hexagonal.payments.application.ports.out.CreatePaymentOutputPort;
 import com.mv.hexagonal.payments.application.ports.out.FindUserByIdOutputPort;
 import com.mv.hexagonal.payments.application.ports.out.TransferBalanceOutputPort;
 import com.mv.hexagonal.payments.application.ports.out.UpdatePaymentOutputPort;
+import com.mv.hexagonal.payments.application.ports.out.ValidateTransactionByFraudOutputPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,11 +16,13 @@ public class ExecutePaymentConfig {
       FindUserByIdOutputPort findUserByIdOutputPort,
       CreatePaymentOutputPort createPaymentOutputPort,
       UpdatePaymentOutputPort updatePaymentOutputPort,
-      TransferBalanceOutputPort transferBalanceOutputPort) {
+      TransferBalanceOutputPort transferBalanceOutputPort,
+      ValidateTransactionByFraudOutputPort validateTransactionByFraudOutputPort) {
     return new ExecutePaymentUseCase(
         findUserByIdOutputPort,
         createPaymentOutputPort,
         updatePaymentOutputPort,
-        transferBalanceOutputPort);
+        transferBalanceOutputPort,
+        validateTransactionByFraudOutputPort);
   }
 }
