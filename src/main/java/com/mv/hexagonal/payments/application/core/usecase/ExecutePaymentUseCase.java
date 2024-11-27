@@ -11,6 +11,7 @@ import com.mv.hexagonal.payments.application.core.usecase.exceptions.NotFoundExc
 import com.mv.hexagonal.payments.application.ports.in.ExecutePaymentInputPort;
 import com.mv.hexagonal.payments.application.ports.out.CreatePaymentOutputPort;
 import com.mv.hexagonal.payments.application.ports.out.FindUserByIdOutputPort;
+import com.mv.hexagonal.payments.application.ports.out.PaymentInfoProducerOutputPort;
 import com.mv.hexagonal.payments.application.ports.out.TransferBalanceOutputPort;
 import com.mv.hexagonal.payments.application.ports.out.UpdatePaymentOutputPort;
 import com.mv.hexagonal.payments.application.ports.out.ValidateTransactionByFraudOutputPort;
@@ -25,6 +26,7 @@ public class ExecutePaymentUseCase implements ExecutePaymentInputPort {
   private final UpdatePaymentOutputPort updatePaymentOutputPort;
   private final TransferBalanceOutputPort transferBalanceOutputPort;
   private final ValidateTransactionByFraudOutputPort validateTransactionByFraudOutputPort;
+  private final PaymentInfoProducerOutputPort publishPaymentInfoOutputPort;
 
   @Override
   public Payment execute(Payment newPayment) {
@@ -36,11 +38,14 @@ public class ExecutePaymentUseCase implements ExecutePaymentInputPort {
     var paymentCreated = createPaymentOutputPort.create(newPayment);
 
     validateTransaction(fromUser, paymentCreated);
+    executeTransaction(fromUser, toUser, paymentCreated);
 
-    return executeTransaction(fromUser, toUser, paymentCreated);
+    publishPaymentInfo(paymentCreated);
+
+    return paymentCreated;
   }
 
-  private Payment executeTransaction(User fromUser, User toUser, Payment paymentCreated) {
+  private void executeTransaction(User fromUser, User toUser, Payment paymentCreated) {
     try {
       transferBalanceOutputPort.transfer(fromUser, toUser, paymentCreated.getAmount());
       paymentCreated.approve();
@@ -51,8 +56,6 @@ public class ExecutePaymentUseCase implements ExecutePaymentInputPort {
     } finally {
       updatePaymentOutputPort.update(paymentCreated);
     }
-
-    return paymentCreated;
   }
 
   private void validateTransaction(User fromUser, Payment paymentCreated) {
@@ -90,5 +93,9 @@ public class ExecutePaymentUseCase implements ExecutePaymentInputPort {
 
   private void validateIfTransactionIsSafe(Payment payment) {
     validateTransactionByFraudOutputPort.validate(payment);
+  }
+
+  private void publishPaymentInfo(Payment payment) {
+    publishPaymentInfoOutputPort.publish(payment);
   }
 }
