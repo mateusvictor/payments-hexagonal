@@ -31,6 +31,7 @@ topics:
     name: payments.info
     partitions: 3
     replication-factor: 1
+    group-id: payments-group01
 
 
 # Kafka Logs
@@ -38,10 +39,10 @@ logging:
   level:
     org:
       springframework.kafka.*: OFF
-    springframework:
-      kafka:
-        listener:
-          [KafkaMessageListenerContainer$ListenerConsumer]: OFF
+#    springframework:
+#      kafka:
+#        listener:
+#          [KafkaMessageListenerContainer$ListenerConsumer]: OFF
     org.apache.kafka.*: OFF
     kafka.*: OFF
     org.apache.zookeeper.*: OFF

@@ -37,39 +37,37 @@ public class ExecutePaymentUseCase implements ExecutePaymentInputPort {
 
     var paymentCreated = createPaymentOutputPort.create(newPayment);
 
-    validateTransaction(fromUser, paymentCreated);
-    executeTransaction(fromUser, toUser, paymentCreated);
-
-    publishPaymentInfo(paymentCreated);
+    try {
+      validateTransaction(fromUser, paymentCreated);
+      executeTransaction(fromUser, toUser, paymentCreated);
+    } finally {
+      postActionTransaction(paymentCreated);
+    }
 
     return paymentCreated;
   }
 
-  private void executeTransaction(User fromUser, User toUser, Payment paymentCreated) {
+  private void executeTransaction(User fromUser, User toUser, Payment payment) {
     try {
-      transferBalanceOutputPort.transfer(fromUser, toUser, paymentCreated.getAmount());
-      paymentCreated.approve();
+      transferBalanceOutputPort.transfer(fromUser, toUser, payment.getAmount());
+      payment.approve();
     } catch (Exception ex) {
       log.error("Error while executing payment", ex);
-      paymentCreated.cancelByError();
-      throw new FailedDependencyException("Error while executing payment", paymentCreated);
-    } finally {
-      updatePaymentOutputPort.update(paymentCreated);
+      payment.cancelByError();
+      throw new FailedDependencyException("Error while executing payment", payment);
     }
   }
 
-  private void validateTransaction(User fromUser, Payment paymentCreated) {
+  private void validateTransaction(User fromUser, Payment payment) {
     try {
-      validateIfSenderHasEnoughBalance(fromUser, paymentCreated);
-      validateIfTransactionIsSafe(paymentCreated);
+      validateIfSenderHasEnoughBalance(fromUser, payment);
+      validateIfTransactionIsSafe(payment);
     } catch (FraudValidationException ex) {
-      paymentCreated.cancelByFraud();
-      throw new BadRequestException("Fraud detected", paymentCreated);
+      payment.cancelByFraud();
+      throw new BadRequestException("Fraud detected", payment);
     } catch (InsufficientAmountException ex) {
-      paymentCreated.cancelByInsufficientAmount();
-      throw new BadRequestException("Insufficient amount", paymentCreated);
-    } finally {
-      updatePaymentOutputPort.update(paymentCreated);
+      payment.cancelByInsufficientAmount();
+      throw new BadRequestException("Insufficient amount", payment);
     }
   }
 
@@ -95,7 +93,8 @@ public class ExecutePaymentUseCase implements ExecutePaymentInputPort {
     validateTransactionByFraudOutputPort.validate(payment);
   }
 
-  private void publishPaymentInfo(Payment payment) {
+  private void postActionTransaction(Payment payment) {
+    updatePaymentOutputPort.update(payment);
     publishPaymentInfoOutputPort.publish(payment);
   }
 }
