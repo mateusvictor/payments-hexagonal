@@ -24,3 +24,24 @@ clients:
     timeout: 5000
     max-connections: 100
     max-per-route: 20
+
+topics:
+  bootstrap-address: localhost:9092
+  payment-info:
+    name: payments.info
+    partitions: 3
+    replication-factor: 1
+
+
+# Kafka Logs
+logging:
+  level:
+    org:
+      springframework.kafka.*: OFF
+    springframework:
+      kafka:
+        listener:
+          [KafkaMessageListenerContainer$ListenerConsumer]: OFF
+    org.apache.kafka.*: OFF
+    kafka.*: OFF
+    org.apache.zookeeper.*: OFF
