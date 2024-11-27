@@ -2,11 +2,12 @@ package com.mv.hexagonal.payments.application.core.usecase;
 
 import com.mv.hexagonal.payments.application.core.domain.Payment;
 import com.mv.hexagonal.payments.application.core.domain.User;
+import com.mv.hexagonal.payments.application.core.usecase.exceptions.BadRequestException;
+import com.mv.hexagonal.payments.application.core.usecase.exceptions.FailedDependencyException;
 import com.mv.hexagonal.payments.application.core.usecase.exceptions.FraudValidationException;
 import com.mv.hexagonal.payments.application.core.usecase.exceptions.InsufficientAmountException;
 import com.mv.hexagonal.payments.application.core.usecase.exceptions.InvalidUsersInvolvedException;
 import com.mv.hexagonal.payments.application.core.usecase.exceptions.NotFoundException;
-import com.mv.hexagonal.payments.application.core.usecase.exceptions.TransferBalanceException;
 import com.mv.hexagonal.payments.application.ports.in.ExecutePaymentInputPort;
 import com.mv.hexagonal.payments.application.ports.out.CreatePaymentOutputPort;
 import com.mv.hexagonal.payments.application.ports.out.FindUserByIdOutputPort;
@@ -26,7 +27,7 @@ public class ExecutePaymentUseCase implements ExecutePaymentInputPort {
   private final ValidateTransactionByFraudOutputPort validateTransactionByFraudOutputPort;
 
   @Override
-  public void execute(Payment newPayment) {
+  public Payment execute(Payment newPayment) {
     var fromUser = getUserOrThrowException(newPayment.getFromUserId());
     var toUser = getUserOrThrowException(newPayment.getToUserId());
 
@@ -34,25 +35,36 @@ public class ExecutePaymentUseCase implements ExecutePaymentInputPort {
 
     var paymentCreated = createPaymentOutputPort.create(newPayment);
 
-    validateAndExecuteTransaction(fromUser, toUser, paymentCreated);
+    validateTransaction(fromUser, paymentCreated);
+
+    return executeTransaction(fromUser, toUser, paymentCreated);
   }
 
-  private void validateAndExecuteTransaction(User fromUser, User toUser, Payment paymentCreated) {
+  private Payment executeTransaction(User fromUser, User toUser, Payment paymentCreated) {
     try {
-      validateIfSenderHasEnoughBalance(fromUser, paymentCreated);
-      validateIfTransactionIsSafe(paymentCreated);
       transferBalanceOutputPort.transfer(fromUser, toUser, paymentCreated.getAmount());
       paymentCreated.approve();
-
-    } catch (FraudValidationException ex) {
-      paymentCreated.cancelByFraud();
-    } catch (InsufficientAmountException ex) {
-      paymentCreated.cancelByInsufficientAmount();
-    } catch (TransferBalanceException ex) {
-      paymentCreated.cancelByError();
     } catch (Exception ex) {
       log.error("Error while executing payment", ex);
       paymentCreated.cancelByError();
+      throw new FailedDependencyException("Error while executing payment", paymentCreated);
+    } finally {
+      updatePaymentOutputPort.update(paymentCreated);
+    }
+
+    return paymentCreated;
+  }
+
+  private void validateTransaction(User fromUser, Payment paymentCreated) {
+    try {
+      validateIfSenderHasEnoughBalance(fromUser, paymentCreated);
+      validateIfTransactionIsSafe(paymentCreated);
+    } catch (FraudValidationException ex) {
+      paymentCreated.cancelByFraud();
+      throw new BadRequestException("Fraud detected", paymentCreated);
+    } catch (InsufficientAmountException ex) {
+      paymentCreated.cancelByInsufficientAmount();
+      throw new BadRequestException("Insufficient amount", paymentCreated);
     } finally {
       updatePaymentOutputPort.update(paymentCreated);
     }
