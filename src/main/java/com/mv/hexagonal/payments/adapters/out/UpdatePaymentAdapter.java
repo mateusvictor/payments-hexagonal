@@ -14,8 +14,8 @@ public class UpdatePaymentAdapter implements UpdatePaymentOutputPort {
   private final PaymentEntityMapper paymentEntityMapper;
 
   @Override
-  public void update(Payment payment) {
+  public Payment update(Payment payment) {
     var paymentEntity = paymentEntityMapper.toPaymentEntity(payment);
-    paymentRepository.save(paymentEntity);
+    return paymentEntityMapper.toPayment(paymentRepository.save(paymentEntity));
   }
 }
