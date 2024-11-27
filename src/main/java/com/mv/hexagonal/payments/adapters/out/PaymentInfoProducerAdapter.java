@@ -1,4 +1,4 @@
-package com.mv.hexagonal.payments.adapters.out.producer;
+package com.mv.hexagonal.payments.adapters.out;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
