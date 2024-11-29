@@ -16,14 +16,18 @@ spring:
     properties:
       hibernate:
         format_sql: true
-
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            loggerLevel: full
 
 clients:
   fraud-api:
     url: http://localhost:8081
-    timeout: 5000
-    max-connections: 100
-    max-per-route: 20
+  notifications-api:
+    url: http://localhost:8081
 
 topics:
   bootstrap-address: localhost:9092
@@ -33,16 +37,16 @@ topics:
     replication-factor: 1
     group-id: payments-group01
 
-
 # Kafka Logs
 logging:
   level:
+    com.mv.hexagonal.payments.adapters.out.client: DEBUG
     org:
       springframework.kafka.*: OFF
-#    springframework:
-#      kafka:
-#        listener:
-#          [KafkaMessageListenerContainer$ListenerConsumer]: OFF
+    springframework:
+      kafka:
+        listener:
+          [KafkaMessageListenerContainer$ListenerConsumer]: OFF
     org.apache.kafka.*: OFF
     kafka.*: OFF
     org.apache.zookeeper.*: OFF

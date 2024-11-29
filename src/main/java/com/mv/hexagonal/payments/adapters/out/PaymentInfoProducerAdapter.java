@@ -1,8 +1,8 @@
 package com.mv.hexagonal.payments.adapters.out;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mv.hexagonal.payments.adapters.out.producer.mapper.PaymentInfoMessageMapper;
+import com.mv.hexagonal.payments.adapters.out.producer.message.PaymentInfoMessage;
 import com.mv.hexagonal.payments.application.core.domain.Payment;
 import com.mv.hexagonal.payments.application.ports.out.PaymentInfoProducerOutputPort;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PaymentInfoProducerAdapter implements PaymentInfoProducerOutputPort {
   private final PaymentInfoMessageMapper paymentInfoMessageMapper;
-  private final KafkaTemplate<String, String> kafkaTemplate;
+  private final KafkaTemplate<String, PaymentInfoMessage> kafkaTemplate;
   private final ObjectMapper objectMapper;
 
   @Value(value = "${topics.payment-info.name}")
@@ -27,20 +27,16 @@ public class PaymentInfoProducerAdapter implements PaymentInfoProducerOutputPort
     var paymentMessage = paymentInfoMessageMapper.toPaymentInfoMessage(payment);
 
     try {
-      var value = objectMapper.writeValueAsString(paymentMessage);
       var key = String.valueOf(paymentMessage.getId());
 
       log.info(
           String.format(
               "Start sending message with key: %s and value: %s for topic: %s",
-              key, value, paymentInfoTopic));
+              key, paymentMessage, paymentInfoTopic));
 
-      this.kafkaTemplate.send(paymentInfoTopic, key, value);
-
-    } catch (JsonProcessingException e) {
-      log.error("Error to convert DTO to Json format", e);
+      this.kafkaTemplate.send(paymentInfoTopic, key, paymentMessage);
     } catch (Exception e) {
-      log.error("Generic error", e);
+      log.error("Kafka producer error: ", e);
     }
   }
 }
