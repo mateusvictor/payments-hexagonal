@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.KafkaAdmin;
 
 @Configuration
-public class PaymentInfoKafkaTopicConfig {
+public class KafkaTopicConfig {
 
   @Value(value = "${topics.bootstrap-address}")
   private String bootstrapAddress;
@@ -32,7 +32,7 @@ public class PaymentInfoKafkaTopicConfig {
   }
 
   @Bean("paymentInfoTopic")
-  public NewTopic locationTopic() {
+  public NewTopic paymentInfoTopic() {
     return new NewTopic(paymentInfoTopic, partitions, replicationFactor);
   }
 }

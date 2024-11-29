@@ -7,4 +7,6 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface PaymentInfoMessageMapper {
   PaymentInfoMessage toPaymentInfoMessage(Payment payment);
+
+  Payment toPayment(PaymentInfoMessage paymentInfoMessage);
 }
